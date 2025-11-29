@@ -1,6 +1,6 @@
 import { UserDocument } from '../domain/user.model';
-import { userRepository } from '../infractructure/user.repository';
 import { AppError } from '../../../core/errors/AppError';
+import { UserRepository } from '../infrastructure/user.repository';
 
 export interface IUserService {
   findByLoginOrEmail(identifier: string): Promise<UserDocument | null>;
@@ -11,10 +11,10 @@ export interface IUserService {
 }
 
 export class UserService implements IUserService {
-  private userRepository: userRepository;
+  private userRepository: UserRepository;
 
   constructor() {
-    this.userRepository = new userRepository();
+    this.userRepository = new UserRepository();
   }
 
   public async findByLoginOrEmail(identifier: string): Promise<UserDocument | null> {

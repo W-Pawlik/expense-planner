@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { authService } from '../../modules/auth/application/auth.service';
+import { AuthService } from '../../modules/auth/application/auth.service';
 import { RegisterInput, LoginInput } from '../../modules/auth/domain/auth.types';
 
-const authorizationService = new authService();
+const authorizationService = new AuthService();
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {

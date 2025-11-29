@@ -9,7 +9,7 @@ export interface IAuthService {
   login(input: LoginInput): Promise<LoginResponse>;
 }
 
-export class authService implements IAuthService {
+export class AuthService implements IAuthService {
   private userService: UserService;
 
   constructor() {

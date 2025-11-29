@@ -5,6 +5,7 @@ import { registerAdminRoutes } from './routes/admin.routes';
 import { registerUserRoutes } from './routes/user.routes';
 import { registerAuthRoutes } from './routes/auth.routes';
 import { registerGroupRoutes } from './routes/group.routes';
+import { registerBoardRoutes } from './routes/board.routes';
 
 export const createApp = (): Application => {
   const app = express();
@@ -17,6 +18,7 @@ export const createApp = (): Application => {
   registerUserRoutes(app);
   registerAdminRoutes(app);
   registerGroupRoutes(app);
+  registerBoardRoutes(app);
 
   app.use(errorHandler);
 

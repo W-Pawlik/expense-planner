@@ -3,6 +3,7 @@ import { FinancialGroupRepository } from '../infrastructure/group.repository';
 import { PositionRepository } from '../infrastructure/position.repository';
 import { CreateGroupInput, UpdateGroupInput, ChangeVisibilityInput } from '../domain/group.types';
 import { VisibilityStatus } from '../../../core/enums/isibilityStatus.enum';
+import { BoardService } from '../../board-post.model.ts/application/board.service';
 
 export interface IFinancialGroupService {
   createGroup(userId: string, input: CreateGroupInput): Promise<any>;
@@ -16,10 +17,12 @@ export interface IFinancialGroupService {
 export class FinancialGroupService implements IFinancialGroupService {
   private groupRepository: FinancialGroupRepository;
   private positionRepository: PositionRepository;
+  private boardService: BoardService;
 
   constructor() {
     this.groupRepository = new FinancialGroupRepository();
     this.positionRepository = new PositionRepository();
+    this.boardService = new BoardService();
   }
 
   public async createGroup(userId: string, input: CreateGroupInput) {
@@ -120,6 +123,12 @@ export class FinancialGroupService implements IFinancialGroupService {
       throw new AppError('Group not found', 404);
     }
 
+    if (group.visibilityStatus === VisibilityStatus.PUBLIC) {
+      await this.boardService.ensurePostForGroup(group._id.toString(), userId);
+    } else {
+      await this.boardService.hidePostForGroup(group._id.toString());
+    }
+
     return {
       id: group._id.toString(),
       name: group.name,
@@ -137,5 +146,6 @@ export class FinancialGroupService implements IFinancialGroupService {
     }
 
     await this.positionRepository.deleteManyByGroupId(groupId);
+    await this.boardService.removePostForGroup(groupId);
   }
 }

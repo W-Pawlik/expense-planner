@@ -14,7 +14,7 @@ export interface IUserRepository {
   deleteById(id: string): Promise<UserDocument | null>;
 }
 
-export class userRepository implements IUserRepository {
+export class UserRepository implements IUserRepository {
   public async findByLogin(login: string): Promise<UserDocument | null> {
     return UserModel.findOne({ login }).exec();
   }
