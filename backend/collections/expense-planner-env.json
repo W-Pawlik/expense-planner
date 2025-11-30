@@ -1,0 +1,46 @@
+{
+  "id": "3f18d39c-35c8-45f3-903a-fbf5c9af93b9",
+  "name": "expense-planner-local",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "enabled": true
+    },
+    {
+      "key": "userToken",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "adminUserId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "groupId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "positionId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "boardPostId",
+      "value": "",
+      "enabled": true
+    }
+  ]
+}

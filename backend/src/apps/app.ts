@@ -10,7 +10,7 @@ import { registerBoardRoutes } from './routes/board.routes';
 export const createApp = (): Application => {
   const app = express();
   app.use(express.json());
-  app.get('hetalth', (_req, res) => {
+  app.get('health', (_req, res) => {
     res.json({ status: 'ok' });
   });
 

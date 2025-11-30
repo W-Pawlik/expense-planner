@@ -10,7 +10,7 @@ const adminService = new AdminService();
 
 export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { page, limit } = req.query as unknown as ListUsersQuery;
+    const { page, limit } = (req as any).validatedQuery as ListUsersQuery;
     const result = await adminService.listUsers(page, limit);
     res.json(result);
   } catch (err) {
@@ -30,7 +30,7 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 
 export const getPendingBoardPosts = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { page, limit } = req.query as unknown as ListBoardPostsQuery;
+    const { page, limit } = (req as any).validatedQuery as ListUsersQuery;
     const result = await adminService.listPendingBoardPosts(page, limit);
     res.json(result);
   } catch (err) {

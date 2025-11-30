@@ -6,7 +6,7 @@ const boardService = new BoardService();
 
 export const getPublicBoard = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { page, limit } = req.query as unknown as ListBoardPostsQuery;
+    const { page, limit } = (req as any).validatedQuery as ListBoardPostsQuery;
     const result = await boardService.listPublicPosts(page, limit);
     res.json(result);
   } catch (err) {
