@@ -196,6 +196,7 @@ High-level architecture:
 - **MUI** for components
 - **Emotion** for styling
 - **Rect Query** for fetching, caching
+- **Redux Toolkit**
 
 ### Backend
 
