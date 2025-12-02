@@ -1,8 +1,9 @@
 import { BrowserRouter, useRoutes } from "react-router-dom";
 import { authRoutes } from "./features/auth/routes";
+import { homeRoutes } from "./features/home/routes";
 
 const AppRoutes = () => {
-  const element = useRoutes([...authRoutes]);
+  const element = useRoutes([...homeRoutes, ...authRoutes]);
   return element;
 };
 
