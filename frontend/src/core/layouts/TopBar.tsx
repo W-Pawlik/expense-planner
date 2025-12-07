@@ -41,6 +41,8 @@ export const TopBar = () => {
 
   const pagesToRender = isGuestPublicAuthScreen ? [] : navPagesLinks;
 
+  const showHamburger = !isGuestPublicAuthScreen;
+
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -77,8 +79,8 @@ export const TopBar = () => {
               Money Planner
             </Typography>
 
-            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-              {!isGuestPublicAuthScreen && (
+            {showHamburger && (
+              <Box sx={{ display: { xs: "flex", md: "none" }, mr: 1 }}>
                 <IconButton
                   size="large"
                   aria-label="open navigation"
@@ -87,8 +89,8 @@ export const TopBar = () => {
                 >
                   <MenuIcon />
                 </IconButton>
-              )}
-            </Box>
+              </Box>
+            )}
 
             <MonetizationOnIcon
               sx={{ display: { xs: "flex", md: "none" }, mr: 1 }}
