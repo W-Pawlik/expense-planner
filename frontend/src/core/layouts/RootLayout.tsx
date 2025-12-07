@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import { Outlet } from "react-router-dom";
 import { TopBar } from "./TopBar";
+import { Footer } from "./Footer";
 
 export const RootLayout = () => {
   return (
@@ -27,6 +28,7 @@ export const RootLayout = () => {
       >
         <Outlet />
       </Box>
+      <Footer />
     </Box>
   );
 };

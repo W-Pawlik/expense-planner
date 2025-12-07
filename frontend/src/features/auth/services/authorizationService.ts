@@ -1,48 +1,37 @@
-import type { LoginCredentials } from "../auth.schemas";
+import type { LoginFormValues } from "../models/login.schema";
+import type { RegisterFormValues } from "../models/register.schema";
 import type { User } from "../types/credentials";
 
+import { httpClient } from "../../../core/http/httpClient";
+import { authUrls } from "../consts/authUrls";
+
+type AuthResponse = { user: User; token: string };
+
 export interface IAuthorizationService {
-  loginUser(data: LoginCredentials): Promise<{ user: User; token: string }>;
-  fetchUserData(): Promise<User | null>;
+  registerUser: (data: RegisterFormValues) => Promise<AuthResponse>;
+  loginUser: (data: LoginFormValues) => Promise<AuthResponse>;
 }
 
 export const authorizationService: IAuthorizationService = {
-  loginUser: async (data: LoginCredentials) => {
-    try {
-      const res = await fetch("http://localhost:3000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+  registerUser: async (data) => {
+    const payload = {
+      login: data.login,
+      email: data.email,
+      password: data.password,
+    };
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(body?.message ?? "Logging failed");
-      }
-
-      return res.json() as Promise<{ user: User; token: string }>;
-    } catch {
-      throw new Error("Unexpected error occured during data fetching");
-    }
+    return httpClient.requestJson<AuthResponse>(authUrls.register, {
+      method: "POST",
+      headers: httpClient.jsonHeaders,
+      body: JSON.stringify(payload),
+    });
   },
 
-  fetchUserData: async () => {
-    try {
-      const res = await fetch("http://localhost:3000/auth/userdata");
-
-      const data = await res.json();
-
-      if (res.status === 401) {
-        return null;
-      }
-
-      if (!res.ok) {
-        throw new Error(data?.message ?? "Fetching user data failed");
-      }
-
-      return data;
-    } catch {
-      throw new Error("Unexpected error occured during data fetching");
-    }
+  loginUser: async (data) => {
+    return httpClient.requestJson<AuthResponse>(authUrls.login, {
+      method: "POST",
+      headers: httpClient.jsonHeaders,
+      body: JSON.stringify(data),
+    });
   },
 };

@@ -5,21 +5,24 @@ import { homeRoutes } from "./features/home/routes";
 import { authRoutes } from "./features/auth/routes";
 import { financialGroupsRoutes } from "./features/financial-groups/routes";
 import { RequireAuth } from "./features/auth/components/guards/RequireAuth";
+import { RequireGuest } from "./features/auth/components/guards/RequireGuest";
+import { accountRoutes } from "./features/account/routes";
 
 const routes: RouteObject[] = [
   {
     element: <RootLayout />,
     children: [
-      ...homeRoutes,
-      ...authRoutes,
+      {
+        element: <RequireGuest />,
+        children: [...homeRoutes, ...authRoutes],
+      },
       {
         element: <RequireAuth />,
-        children: [...financialGroupsRoutes],
+        children: [...financialGroupsRoutes, ...accountRoutes],
       },
     ],
   },
 ];
-
 const AppRoutes = () => useRoutes(routes);
 
 export const AppRouter = () => (

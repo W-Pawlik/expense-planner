@@ -11,6 +11,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import MenuIcon from "@mui/icons-material/Menu";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
@@ -18,9 +19,10 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { navPagesLinks, navAccLinks } from "../consts/topBar";
 import { useUserData } from "../../features/auth/hooks/useUserData";
+import { useLogout } from "../../features/auth/hooks/useLogout";
 
 export const TopBar = () => {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -30,6 +32,12 @@ export const TopBar = () => {
 
   const { data: userData, isLoading } = useUserData();
   const location = useLocation();
+  const logout = useLogout?.();
+
+  const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
+  const isAuthResolving = !!token && isLoading;
 
   const isAuthenticated = !!userData;
 
@@ -39,9 +47,13 @@ export const TopBar = () => {
   const isGuestPublicAuthScreen =
     isPublicAuthScreen && !isAuthenticated && !isLoading;
 
-  const pagesToRender = isGuestPublicAuthScreen ? [] : navPagesLinks;
+  const pagesToRender = isAuthResolving
+    ? []
+    : isGuestPublicAuthScreen
+    ? []
+    : navPagesLinks;
 
-  const showHamburger = !isGuestPublicAuthScreen;
+  const showHamburger = !isAuthResolving && !isGuestPublicAuthScreen;
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
@@ -52,6 +64,14 @@ export const TopBar = () => {
 
   const openDrawer = () => setDrawerOpen(true);
   const closeDrawer = () => setDrawerOpen(false);
+
+  const handleAccClick = (label: string) => {
+    handleCloseUserMenu();
+    if (label === "Logout" && logout) logout();
+    if (label !== "Logout") {
+      navigate(`/${label.toLowerCase()}`);
+    }
+  };
 
   return (
     <>
@@ -106,8 +126,9 @@ export const TopBar = () => {
                 flexGrow: 1,
                 fontFamily: "monospace",
                 fontWeight: 700,
-                letterSpacing: ".3rem",
+                letterSpacing: ".1rem",
                 color: "inherit",
+                fontSize: 12,
                 textDecoration: "none",
               }}
             >
@@ -133,9 +154,13 @@ export const TopBar = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
+                minWidth: 120,
+                justifyContent: "flex-end",
               }}
             >
-              {!isAuthenticated ? (
+              {isAuthResolving ? (
+                <CircularProgress size={22} color="inherit" />
+              ) : !isAuthenticated ? (
                 <>
                   <Button
                     component={RouterLink}
@@ -181,7 +206,10 @@ export const TopBar = () => {
                     onClose={handleCloseUserMenu}
                   >
                     {navAccLinks.map((setting) => (
-                      <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                      <MenuItem
+                        key={setting}
+                        onClick={() => handleAccClick(setting)}
+                      >
                         <Typography sx={{ textAlign: "center" }}>
                           {setting}
                         </Typography>

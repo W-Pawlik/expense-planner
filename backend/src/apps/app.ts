@@ -1,3 +1,4 @@
+import cors from 'cors';
 import { Application } from 'express';
 import express from 'express';
 import { errorHandler } from '../core/errors/errorHandler';
@@ -9,8 +10,19 @@ import { registerBoardRoutes } from './routes/board.routes';
 
 export const createApp = (): Application => {
   const app = express();
+
+  const corsOptions: cors.CorsOptions = {
+    origin: ['http://localhost:5173'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  };
+
+  app.use(cors(corsOptions));
+
+  app.options(/.*/, cors(corsOptions));
+
   app.use(express.json());
-  app.get('health', (_req, res) => {
+  app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
   });
 

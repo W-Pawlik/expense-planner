@@ -1,2 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const API_URL = import.meta.env.VITE_API_URL;
+export const env = {
+  apiUrl: import.meta.env.VITE_API_URL ?? "http://localhost:3000",
+} as const;
