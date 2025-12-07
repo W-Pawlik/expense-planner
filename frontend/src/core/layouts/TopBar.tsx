@@ -19,7 +19,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { navPagesLinks, navAccLinks } from "../consts/topBar";
 import { useUserData } from "../../features/auth/hooks/useUserData";
 import { useLogout } from "../../features/auth/hooks/useLogout";
@@ -33,6 +33,8 @@ export const TopBar = () => {
   const { data: userData, isLoading } = useUserData();
   const location = useLocation();
   const logout = useLogout?.();
+
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
   const isAuthResolving = !!token && isLoading;
@@ -66,6 +68,9 @@ export const TopBar = () => {
   const handleAccClick = (label: string) => {
     handleCloseUserMenu();
     if (label === "Logout" && logout) logout();
+    if (label !== "Logout") {
+      navigate(`/${label.toLowerCase()}`);
+    }
   };
 
   return (
