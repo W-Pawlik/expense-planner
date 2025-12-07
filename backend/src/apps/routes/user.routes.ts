@@ -7,7 +7,7 @@ export const createUserRouter = (): Router => {
 
   router.use(authMiddleware);
 
-  router.get('/userdata', getUserData);
+  router.get('/me', getUserData);
 
   return router;
 };

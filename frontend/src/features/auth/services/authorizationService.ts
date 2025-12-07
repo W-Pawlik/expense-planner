@@ -1,48 +1,59 @@
-import type { LoginCredentials } from "../auth.schemas";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { LoginFormValues } from "../models/login.schema";
+import type { RegisterFormValues } from "../models/register.schema";
 import type { User } from "../types/credentials";
 
+import { httpClient } from "../../../core/http/httpClient";
+import { authUrls } from "../consts/authUrls";
+import { authStorage } from "../utils/authStorage";
+
+type AuthResponse = { user: User; token: string };
+
 export interface IAuthorizationService {
-  loginUser(data: LoginCredentials): Promise<{ user: User; token: string }>;
-  fetchUserData(): Promise<User | null>;
+  registerUser: (data: RegisterFormValues) => Promise<AuthResponse>;
+  loginUser: (data: LoginFormValues) => Promise<AuthResponse>;
+  fetchUserData: () => Promise<User | null>;
 }
 
 export const authorizationService: IAuthorizationService = {
-  loginUser: async (data: LoginCredentials) => {
-    try {
-      const res = await fetch("http://localhost:3000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+  registerUser: async (data) => {
+    const payload = {
+      login: data.login,
+      email: data.email,
+      password: data.password,
+    };
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(body?.message ?? "Logging failed");
-      }
+    return httpClient.requestJson<AuthResponse>(authUrls.register, {
+      method: "POST",
+      headers: httpClient.jsonHeaders,
+      body: JSON.stringify(payload),
+    });
+  },
 
-      return res.json() as Promise<{ user: User; token: string }>;
-    } catch {
-      throw new Error("Unexpected error occured during data fetching");
-    }
+  loginUser: async (data) => {
+    return httpClient.requestJson<AuthResponse>(authUrls.login, {
+      method: "POST",
+      headers: httpClient.jsonHeaders,
+      body: JSON.stringify(data),
+    });
   },
 
   fetchUserData: async () => {
+    const token = authStorage.getToken();
+    if (!token) return null;
+
     try {
-      const res = await fetch("http://localhost:3000/auth/userdata");
-
-      const data = await res.json();
-
-      if (res.status === 401) {
+      return await httpClient.requestAuthJson<User>(authUrls.me, token);
+    } catch (e: any) {
+      if (
+        String(e?.message ?? "")
+          .toLowerCase()
+          .includes("unauthorized")
+      ) {
+        authStorage.clearToken();
         return null;
       }
-
-      if (!res.ok) {
-        throw new Error(data?.message ?? "Fetching user data failed");
-      }
-
-      return data;
-    } catch {
-      throw new Error("Unexpected error occured during data fetching");
+      throw e;
     }
   },
 };
