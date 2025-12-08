@@ -23,6 +23,7 @@ import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { navPagesLinks, navAccLinks } from "../consts/topBar";
 import { useUserData } from "../../features/auth/hooks/useUserData";
 import { useLogout } from "../../features/auth/hooks/useLogout";
+import { authStorage } from "../../features/auth/utils/authStorage";
 
 export const TopBar = () => {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -36,7 +37,7 @@ export const TopBar = () => {
 
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("token");
+  const token = authStorage.getToken();
   const isAuthResolving = !!token && isLoading;
 
   const isAuthenticated = !!userData;
