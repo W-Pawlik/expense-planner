@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { httpClient } from "../../../core/http/httpClient";
-import { authStorage } from "../../auth/utils/authStorage";
+import { env } from "../../../core/config/env";
 import { accountUrls } from "../consts/accountUrls";
+import { authStorage } from "../../auth/utils/authStorage";
 import type { User } from "../../auth/types/credentials";
 
 export const accountService = {
@@ -9,18 +8,23 @@ export const accountService = {
     const token = authStorage.getToken();
     if (!token) return null;
 
-    try {
-      return await httpClient.requestAuthJson<User>(accountUrls.me, token);
-    } catch (e: any) {
-      if (
-        String(e?.message ?? "")
-          .toLowerCase()
-          .includes("unauthorized")
-      ) {
-        authStorage.clearToken();
-        return null;
-      }
-      throw e;
+    const res = await fetch(`${env.apiUrl}${accountUrls.me}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (res.status === 401) {
+      authStorage.clearToken();
+      return null;
     }
+
+    const body = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      throw new Error(body?.message ?? "Fetching user data failed");
+    }
+
+    return body as User;
   },
 } as const;
