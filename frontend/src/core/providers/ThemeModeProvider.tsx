@@ -41,17 +41,43 @@ export const ThemeModeProvider = ({ children }: { children: ReactNode }) => {
     setModeState((prev) => (prev === "light" ? "dark" : "light"));
   }, []);
 
-  const theme = useMemo(
-    () =>
-      createTheme({
-        palette: { mode },
-      }),
-    [mode]
-  );
+  // const theme = useMemo(
+  //   () =>
+  //     createTheme({
+  //       palette: { mode },
+  //     }),
+  //   [mode]
+  // );
 
   const value = useMemo(
     () => ({ mode, toggleMode, setMode }),
     [mode, toggleMode, setMode]
+  );
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+          ...(mode === "dark"
+            ? {
+                primary: { main: "#009966" },
+                background: {
+                  default: "#020618",
+                  paper: "#050d22",
+                },
+                text: {
+                  primary: "#e5e7eb",
+                  secondary: "#9ca3af",
+                },
+              }
+            : {}),
+        },
+        shape: {
+          borderRadius: 12,
+        },
+      }),
+    [mode]
   );
 
   return (
