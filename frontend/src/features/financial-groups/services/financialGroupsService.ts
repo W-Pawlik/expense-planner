@@ -53,6 +53,7 @@ export const financialGroupsService: IFinancialGroupsService = {
       name: data.name,
       projectionYears: data.projectionYears,
       visibilityStatus: data.visibilityStatus as VisibilityStatus,
+      description: data.description,
     };
 
     return httpClient.requestAuthJson<FinancialGroupDetails>(

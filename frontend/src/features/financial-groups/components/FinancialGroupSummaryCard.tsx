@@ -19,6 +19,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import UpdateIcon from "@mui/icons-material/Update";
 import { useEffect, useState } from "react";
+import { EditFinancialGroupSchema } from "../models/editFinancialGroup.schema";
 import type { FinancialGroupSummary } from "../types/financialGroup.types";
 
 interface FinancialGroupSummaryCardProps {
@@ -46,9 +47,14 @@ export const FinancialGroupSummaryCard = ({
   const [name, setName] = useState(group.name);
   const [description, setDescription] = useState(group.description ?? "");
 
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
+
   useEffect(() => {
     setName(group.name);
     setDescription(group.description ?? "");
+    setNameError(null);
+    setDescriptionError(null);
   }, [group.id, group.name, group.description]);
 
   const visibilityLabel =
@@ -62,13 +68,33 @@ export const FinancialGroupSummaryCard = ({
     setIsEditing(false);
     setName(group.name);
     setDescription(group.description ?? "");
+    setNameError(null);
+    setDescriptionError(null);
   };
 
   const handleSaveEdit = () => {
-    onUpdate({
+    const result = EditFinancialGroupSchema.safeParse({
       name: name.trim(),
-      description: description.trim() || null,
+      description: description.trim(),
     });
+
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setNameError(fieldErrors.name?.[0] ?? null);
+      setDescriptionError(fieldErrors.description?.[0] ?? null);
+      return;
+    }
+
+    setNameError(null);
+    setDescriptionError(null);
+
+    const values = result.data;
+
+    onUpdate({
+      name: values.name,
+      description: values.description?.trim() || null,
+    });
+
     setIsEditing(false);
   };
 
@@ -94,15 +120,25 @@ export const FinancialGroupSummaryCard = ({
                   label="Group name"
                   size="small"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    if (nameError) setNameError(null);
+                  }}
+                  error={!!nameError}
+                  helperText={nameError ?? ""}
                 />
                 <TextField
                   label="Description"
                   size="small"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                    if (descriptionError) setDescriptionError(null);
+                  }}
                   multiline
                   minRows={2}
+                  error={!!descriptionError}
+                  helperText={descriptionError ?? ""}
                 />
               </Stack>
             ) : (

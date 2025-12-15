@@ -11,6 +11,7 @@ export const CreateFinancialGroupSchema = z.object({
   visibilityStatus: z.custom<VisibilityStatus>(
     (val) => val === "PRIVATE" || val === "PUBLIC"
   ),
+  description: z.string().max(500).optional().nullable(),
 });
 
 export type CreateFinancialGroupInput = z.infer<

@@ -7,6 +7,7 @@ export interface FinancialGroupDocument extends Document {
   name: string;
   visibilityStatus: VisibilityStatus;
   projectionYears: number;
+  description?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +21,7 @@ const financialGroupSchema = new Schema<FinancialGroupDocument>(
       enum: Object.values(VisibilityStatus),
       default: VisibilityStatus.PRIVATE,
     },
+    description: { type: String, default: null },
     projectionYears: { type: Number, required: true },
   },
   { timestamps: true },

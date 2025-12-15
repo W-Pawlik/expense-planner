@@ -31,6 +31,7 @@ export class FinancialGroupService implements IFinancialGroupService {
       name: input.name,
       projectionYears: input.projectionYears,
       visibilityStatus: input.visibilityStatus ?? VisibilityStatus.PRIVATE,
+      description: input.description ?? null,
     });
 
     return {
@@ -38,6 +39,7 @@ export class FinancialGroupService implements IFinancialGroupService {
       name: group.name,
       projectionYears: group.projectionYears,
       visibilityStatus: group.visibilityStatus,
+      decription: group.description,
       createdAt: group.createdAt,
       updatedAt: group.updatedAt,
     };
@@ -51,6 +53,7 @@ export class FinancialGroupService implements IFinancialGroupService {
       name: g.name,
       projectionYears: g.projectionYears,
       visibilityStatus: g.visibilityStatus,
+      description: g.description,
       createdAt: g.createdAt,
       updatedAt: g.updatedAt,
     }));
@@ -69,6 +72,7 @@ export class FinancialGroupService implements IFinancialGroupService {
       name: group.name,
       projectionYears: group.projectionYears,
       visibilityStatus: group.visibilityStatus,
+      description: group.description,
       createdAt: group.createdAt,
       updatedAt: group.updatedAt,
       positions: positions.map((p) => ({
@@ -90,6 +94,7 @@ export class FinancialGroupService implements IFinancialGroupService {
     const update: {
       name?: string;
       projectionYears?: number;
+      description?: string | null;
     } = {};
 
     if (input.name !== undefined) {
@@ -97,6 +102,10 @@ export class FinancialGroupService implements IFinancialGroupService {
     }
     if (input.projectionYears !== undefined) {
       update.projectionYears = input.projectionYears;
+    }
+
+    if (input.description !== undefined) {
+      update.description = input.description;
     }
 
     const group = await this.groupRepository.updateByIdAndOwner(groupId, userId, update);
@@ -109,6 +118,7 @@ export class FinancialGroupService implements IFinancialGroupService {
       name: group.name,
       projectionYears: group.projectionYears,
       visibilityStatus: group.visibilityStatus,
+      description: group.description,
       createdAt: group.createdAt,
       updatedAt: group.updatedAt,
     };
@@ -134,6 +144,7 @@ export class FinancialGroupService implements IFinancialGroupService {
       name: group.name,
       projectionYears: group.projectionYears,
       visibilityStatus: group.visibilityStatus,
+      description: group.description,
       createdAt: group.createdAt,
       updatedAt: group.updatedAt,
     };

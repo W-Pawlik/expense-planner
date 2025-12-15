@@ -32,6 +32,7 @@ export const CreateFinancialGroupDialog = ({
     resolver: zodResolver(CreateFinancialGroupSchema),
     defaultValues: {
       name: "",
+      description: "",
       projectionYears: 1,
       visibilityStatus: "PRIVATE",
     },
@@ -44,6 +45,7 @@ export const CreateFinancialGroupDialog = ({
 
   const handleFormSubmit = (values: CreateFinancialGroupInput) => {
     onSubmit(values);
+    reset();
   };
 
   return (
@@ -59,6 +61,22 @@ export const CreateFinancialGroupDialog = ({
                 {...field}
                 label="Group name"
                 fullWidth
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
+              />
+            )}
+          />
+
+          <Controller
+            name="description"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                label="Description"
+                fullWidth
+                multiline
+                minRows={2}
                 error={!!fieldState.error}
                 helperText={fieldState.error?.message}
               />

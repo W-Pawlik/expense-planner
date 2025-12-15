@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Box,
   Typography,
@@ -25,6 +26,15 @@ import type {
   FinancialGroupSummary,
   VisibilityStatus,
 } from "../types/financialGroup.types";
+import { FinancialPositionsList } from "../components/FinancialPositionsList";
+
+import { useFinancialGroupDetails } from "../hooks/useFinancialGroupDetails";
+import { useCreatePosition } from "../hooks/useCreatePosition";
+import { useUpdatePosition } from "../hooks/useUpdatePosition";
+import { useDeletePosition } from "../hooks/useDeletePosition";
+import type { FinancialPosition } from "../types/financialPosition.types";
+import type { CreatePositionInput } from "../models/createPosition.schema";
+import { PositionFormDialog } from "../components/PositionFormDialog";
 
 export const FinancialGroupsView = () => {
   const { data, isLoading, isError, error } = useFinancialGroups();
@@ -37,6 +47,13 @@ export const FinancialGroupsView = () => {
   const [visibilityDialogOpen, setVisibilityDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  const [positionDialogOpen, setPositionDialogOpen] = useState(false);
+  const [positionDialogMode, setPositionDialogMode] = useState<
+    "create" | "edit"
+  >("create");
+  const [editingPosition, setEditingPosition] =
+    useState<FinancialPosition | null>(null);
+
   const groups: FinancialGroupSummary[] = data ?? [];
 
   useEffect(() => {
@@ -46,7 +63,39 @@ export const FinancialGroupsView = () => {
     }
   }, [groups, selectedGroupId]);
 
-  const selectedGroup = groups.find((g) => g.id === selectedGroupId) ?? null;
+  const selectedGroupFromList =
+    groups.find((g) => g.id === selectedGroupId) ?? null;
+
+  const { data: groupDetails } = useFinancialGroupDetails(selectedGroupId);
+
+  const selectedGroup = groupDetails ?? selectedGroupFromList;
+
+  const positions: FinancialPosition[] = groupDetails?.positions ?? [];
+
+  let currentMonthlyFlow = 0;
+  let projectedBalance1Y = 0;
+  const totalPositions = positions.length;
+
+  if (positions.length > 0) {
+    let recurringFlow = 0;
+    let oneTimeDelta = 0;
+
+    for (const p of positions) {
+      const sign = p.positionType === "INCOME" ? 1 : -1;
+      if (p.frequencyType === "RECURRING") {
+        recurringFlow += sign * p.amount;
+      } else {
+        oneTimeDelta += sign * p.amount;
+      }
+    }
+
+    currentMonthlyFlow = recurringFlow;
+    projectedBalance1Y = recurringFlow * 12 + oneTimeDelta;
+  }
+
+  const createPositionMutation = useCreatePosition(selectedGroupId);
+  const updatePositionMutation = useUpdatePosition(selectedGroupId);
+  const deletePositionMutation = useDeletePosition(selectedGroupId);
 
   const handleAddGroupClick = () => {
     setCreateDialogOpen(true);
@@ -103,12 +152,57 @@ export const FinancialGroupsView = () => {
     deleteGroupMutation.mutate(selectedGroup.id, {
       onSuccess: () => {
         setDeleteDialogOpen(false);
-        // po usunięciu wybierz inną grupę (pierwszą z listy)
         const remaining = groups.filter((g) => g.id !== selectedGroup.id);
         setSelectedGroupId(remaining[0]?.id ?? null);
       },
     });
   };
+
+  const handleAddPosition = () => {
+    setEditingPosition(null);
+    setPositionDialogMode("create");
+    setPositionDialogOpen(true);
+  };
+
+  const handlePositionClick = (position: FinancialPosition) => {
+    setEditingPosition(position);
+    setPositionDialogMode("edit");
+    setPositionDialogOpen(true);
+  };
+
+  const handleSubmitPosition = (values: CreatePositionInput) => {
+    if (!selectedGroupId) return;
+
+    if (positionDialogMode === "create") {
+      createPositionMutation.mutate(values, {
+        onSuccess: () => setPositionDialogOpen(false),
+      });
+    } else if (positionDialogMode === "edit" && editingPosition) {
+      updatePositionMutation.mutate(
+        { positionId: editingPosition.id, changes: values },
+        { onSuccess: () => setPositionDialogOpen(false) }
+      );
+    }
+  };
+
+  const handleDeletePosition = (positionId: string) => {
+    deletePositionMutation.mutate(positionId);
+  };
+
+  const handleDeletePositionFromDialog = () => {
+    if (!editingPosition) return;
+    deletePositionMutation.mutate(editingPosition.id, {
+      onSuccess: () => setPositionDialogOpen(false),
+    });
+  };
+
+  const isBusy =
+    createGroupMutation.isPending ||
+    updateGroupMutation.isPending ||
+    deleteGroupMutation.isPending ||
+    createPositionMutation.isPending ||
+    updatePositionMutation.isPending ||
+    deletePositionMutation.isPending;
 
   if (isLoading) {
     return (
@@ -150,11 +244,6 @@ export const FinancialGroupsView = () => {
     );
   }
 
-  const isBusy =
-    createGroupMutation.isPending ||
-    updateGroupMutation.isPending ||
-    deleteGroupMutation.isPending;
-
   return (
     <Box>
       <Stack spacing={3}>
@@ -166,7 +255,7 @@ export const FinancialGroupsView = () => {
         />
 
         {selectedGroup && (
-          <>
+          <Box px={10}>
             <FinancialGroupSummaryCard
               group={selectedGroup}
               onUpdate={handleUpdateGroup}
@@ -175,17 +264,21 @@ export const FinancialGroupsView = () => {
               isBusy={isBusy}
             />
 
-            {/* na razie mockujemy wartości */}
             <FinancialProjectionChart
-              currentMonthlyFlow={2750}
-              projectedBalance1Y={35750}
-              totalPositions={5}
+              positions={positions}
+              projectionYears={selectedGroup.projectionYears}
             />
-          </>
+
+            <FinancialPositionsList
+              positions={positions}
+              onAddPosition={handleAddPosition}
+              onDeletePosition={handleDeletePosition}
+              onPositionClick={handlePositionClick}
+            />
+          </Box>
         )}
       </Stack>
 
-      {/* Dialog tworzenia */}
       <CreateFinancialGroupDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}
@@ -193,7 +286,6 @@ export const FinancialGroupsView = () => {
         isSubmitting={createGroupMutation.isPending}
       />
 
-      {/* Dialog zmiany visibility */}
       <Dialog
         open={visibilityDialogOpen}
         onClose={() => setVisibilityDialogOpen(false)}
@@ -245,6 +337,36 @@ export const FinancialGroupsView = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <PositionFormDialog
+        open={positionDialogOpen}
+        mode={positionDialogMode}
+        initialValues={
+          editingPosition
+            ? {
+                name: editingPosition.name,
+                amount: editingPosition.amount,
+                positionType: editingPosition.positionType,
+                frequencyType: editingPosition.frequencyType,
+                notes: editingPosition.notes ?? "",
+                category: editingPosition.category ?? "",
+                interestRate: editingPosition.interestRate ?? undefined,
+              }
+            : undefined
+        }
+        onClose={() => setPositionDialogOpen(false)}
+        onSubmit={handleSubmitPosition}
+        onDelete={
+          positionDialogMode === "edit"
+            ? handleDeletePositionFromDialog
+            : undefined
+        }
+        isSubmitting={
+          createPositionMutation.isPending ||
+          updatePositionMutation.isPending ||
+          deletePositionMutation.isPending
+        }
+      />
     </Box>
   );
 };
