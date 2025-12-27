@@ -1,14 +1,12 @@
-name: CI
+name: CI (main)
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
   backend:
-    name: Backend CI
+    name: Backend CI (main)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,7 +36,7 @@ jobs:
         run: npm run build
 
   frontend:
-    name: Frontend CI
+    name: Frontend CI (main)
     runs-on: ubuntu-latest
     defaults:
       run:
