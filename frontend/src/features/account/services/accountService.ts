@@ -3,6 +3,10 @@ import { accountUrls } from "../consts/accountUrls";
 import { authStorage } from "../../auth/utils/authStorage";
 import type { User } from "../../auth/types/credentials";
 
+export interface IAccountService {
+  fetchMe: () => Promise<User | null>;
+}
+
 export const accountService = {
   async fetchMe(): Promise<User | null> {
     const token = authStorage.getToken();

@@ -7,12 +7,13 @@ import { registerUserRoutes } from './routes/user.routes';
 import { registerAuthRoutes } from './routes/auth.routes';
 import { registerGroupRoutes } from './routes/group.routes';
 import { registerBoardRoutes } from './routes/board.routes';
+import { env } from '../config/env';
 
 export const createApp = (): Application => {
   const app = express();
 
   const corsOptions: cors.CorsOptions = {
-    origin: ['http://localhost:5173'],
+    origin: (env.corsOrigins || '').split(','),
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   };
@@ -22,9 +23,7 @@ export const createApp = (): Application => {
   app.options(/.*/, cors(corsOptions));
 
   app.use(express.json());
-  app.get('/health', (_req, res) => {
-    res.json({ status: 'ok' });
-  });
+  app.get('/health', (_req, res) => res.status(200).json({ status: 'ok' }));
 
   registerAuthRoutes(app);
   registerUserRoutes(app);

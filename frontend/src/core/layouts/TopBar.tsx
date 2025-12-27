@@ -20,10 +20,33 @@ import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
 
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
-import { navPagesLinks, navAccLinks } from "../consts/topBar";
+import { navPagesLinks, navAccLinks, publicAuthPaths } from "../consts/topBar";
 import { useUserData } from "../../features/auth/hooks/useUserData";
 import { useLogout } from "../../features/auth/hooks/useLogout";
 import { authStorage } from "../../features/auth/utils/authStorage";
+import type { SxProps, Theme } from "@mui/material/styles";
+
+const topBarSx: Record<string, SxProps<Theme>> = {
+  brand: {
+    mr: 2,
+    display: "flex",
+    flexGrow: { xs: 1, md: 0 },
+    fontFamily: "monospace",
+    fontWeight: 700,
+    letterSpacing: { xs: ".1rem", md: ".3rem" },
+    fontSize: { xs: 12, md: "inherit" },
+    color: "inherit",
+    textDecoration: "none",
+  },
+  userArea: {
+    flexGrow: 0,
+    display: "flex",
+    alignItems: "center",
+    gap: 1,
+    minWidth: 120,
+    justifyContent: "flex-end",
+  },
+};
 
 export const TopBar = () => {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
@@ -33,28 +56,23 @@ export const TopBar = () => {
 
   const { data: userData, isLoading } = useUserData();
   const location = useLocation();
-  const logout = useLogout?.();
+  const logout = useLogout();
 
   const navigate = useNavigate();
 
   const token = authStorage.getToken();
   const isAuthResolving = !!token && isLoading;
-
   const isAuthenticated = !!userData;
 
-  const publicAuthPaths = new Set(["/", "/login", "/register"]);
   const isPublicAuthScreen = publicAuthPaths.has(location.pathname);
 
   const isGuestPublicAuthScreen =
     isPublicAuthScreen && !isAuthenticated && !isLoading;
 
-  const pagesToRender = isAuthResolving
-    ? []
-    : isGuestPublicAuthScreen
-    ? []
-    : navPagesLinks;
+  const canRenderNav = !isAuthResolving && !isGuestPublicAuthScreen;
 
-  const showHamburger = !isAuthResolving && !isGuestPublicAuthScreen;
+  const pagesToRender = canRenderNav ? navPagesLinks : [];
+  const showHamburger = canRenderNav;
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
@@ -68,7 +86,7 @@ export const TopBar = () => {
 
   const handleAccClick = (label: string) => {
     handleCloseUserMenu();
-    if (label === "Logout" && logout) logout();
+    if (label === "Logout") logout();
     if (label !== "Logout") {
       navigate(`/${label.toLowerCase()}`);
     }
@@ -77,29 +95,8 @@ export const TopBar = () => {
   return (
     <>
       <AppBar position="static">
-        <Box width={"100%"} px={4}>
+        <Box width="100%" px={4}>
           <Toolbar disableGutters>
-            <MonetizationOnIcon
-              sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}
-            />
-            <Typography
-              variant="h6"
-              noWrap
-              component={RouterLink}
-              to="/"
-              sx={{
-                mr: 2,
-                display: { xs: "none", md: "flex" },
-                fontFamily: "monospace",
-                fontWeight: 700,
-                letterSpacing: ".3rem",
-                color: "inherit",
-                textDecoration: "none",
-              }}
-            >
-              Money Planner
-            </Typography>
-
             {showHamburger && (
               <Box sx={{ display: { xs: "flex", md: "none" }, mr: 1 }}>
                 <IconButton
@@ -113,25 +110,14 @@ export const TopBar = () => {
               </Box>
             )}
 
-            <MonetizationOnIcon
-              sx={{ display: { xs: "flex", md: "none" }, mr: 1 }}
-            />
+            <MonetizationOnIcon sx={{ mr: 1 }} />
+
             <Typography
               variant="h6"
               noWrap
               component={RouterLink}
               to="/"
-              sx={{
-                mr: 2,
-                display: { xs: "flex", md: "none" },
-                flexGrow: 1,
-                fontFamily: "monospace",
-                fontWeight: 700,
-                letterSpacing: ".1rem",
-                color: "inherit",
-                fontSize: 12,
-                textDecoration: "none",
-              }}
+              sx={topBarSx.brand}
             >
               Money Planner
             </Typography>
@@ -149,16 +135,7 @@ export const TopBar = () => {
               ))}
             </Box>
 
-            <Box
-              sx={{
-                flexGrow: 0,
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                minWidth: 120,
-                justifyContent: "flex-end",
-              }}
-            >
+            <Box sx={topBarSx.userArea}>
               {isAuthResolving ? (
                 <CircularProgress size={22} color="inherit" />
               ) : !isAuthenticated ? (
@@ -186,23 +163,25 @@ export const TopBar = () => {
               ) : (
                 <>
                   <Tooltip title="Open settings">
-                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <IconButton
+                      onClick={handleOpenUserMenu}
+                      sx={{ p: 0 }}
+                      aria-label="account settings"
+                      aria-controls={anchorElUser ? "account-menu" : undefined}
+                      aria-haspopup="true"
+                      aria-expanded={anchorElUser ? "true" : undefined}
+                    >
                       <Avatar alt="User" src="/static/images/avatar/2.jpg" />
                     </IconButton>
                   </Tooltip>
 
                   <Menu
+                    id="account-menu"
                     sx={{ mt: "45px" }}
                     anchorEl={anchorElUser}
-                    anchorOrigin={{
-                      vertical: "top",
-                      horizontal: "right",
-                    }}
+                    anchorOrigin={{ vertical: "top", horizontal: "right" }}
                     keepMounted
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "right",
-                    }}
+                    transformOrigin={{ vertical: "top", horizontal: "right" }}
                     open={Boolean(anchorElUser)}
                     onClose={handleCloseUserMenu}
                   >

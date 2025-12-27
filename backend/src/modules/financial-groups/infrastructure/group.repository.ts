@@ -7,13 +7,19 @@ export interface IFinancialGroupRepository {
     name: string;
     projectionYears: number;
     visibilityStatus: VisibilityStatus;
+    description?: string | null;
   }): Promise<FinancialGroupDocument>;
   findByIdAndOwner(groupId: string, ownerId: string): Promise<FinancialGroupDocument | null>;
   findAllByOwner(ownerId: string): Promise<FinancialGroupDocument[]>;
   updateByIdAndOwner(
     groupId: string,
     ownerId: string,
-    update: Partial<{ name: string; projectionYears: number; visibilityStatus: VisibilityStatus }>,
+    update: Partial<{
+      name: string;
+      projectionYears: number;
+      visibilityStatus: VisibilityStatus;
+      description?: string | null;
+    }>,
   ): Promise<FinancialGroupDocument | null>;
   deleteByIdAndOwner(groupId: string, ownerId: string): Promise<FinancialGroupDocument | null>;
 }
@@ -24,12 +30,14 @@ export class FinancialGroupRepository implements IFinancialGroupRepository {
     name: string;
     projectionYears: number;
     visibilityStatus: VisibilityStatus;
+    description?: string | null;
   }): Promise<FinancialGroupDocument> {
     const group = new FinancialGroupModel({
       ownerId: params.ownerId,
       name: params.name,
       projectionYears: params.projectionYears,
       visibilityStatus: params.visibilityStatus,
+      description: params.description ?? null,
     });
 
     return group.save();
@@ -53,6 +61,7 @@ export class FinancialGroupRepository implements IFinancialGroupRepository {
       name: string;
       projectionYears: number;
       visibilityStatus: VisibilityStatus;
+      description?: string | null;
     }>,
   ): Promise<FinancialGroupDocument | null> {
     return FinancialGroupModel.findOneAndUpdate(

@@ -4,3 +4,5 @@ export const navPagesLinks = [
 ];
 
 export const navAccLinks = ["Account", "Settings", "Logout"];
+
+export const publicAuthPaths = new Set(["/", "/login", "/register"]);

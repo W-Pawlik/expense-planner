@@ -20,9 +20,8 @@ export const RootLayout = () => {
         sx={{
           width: "100%",
           flex: 1,
-          pt: 3,
           pb: 4,
-          px: { xs: 2, sm: 3, md: 4 },
+          // px: { xs: 2, sm: 3, md: 4 },
           boxSizing: "border-box",
         }}
       >
