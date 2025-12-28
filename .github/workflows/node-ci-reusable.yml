@@ -1,0 +1,45 @@
+name: Reusable Node CI
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: "Folder from package.json"
+        required: true
+        type: string
+      run-build:
+        description: "Do you want to run npm run build?"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  node-ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        if: ${{ inputs.run-build == true }}
+        run: npm run build
