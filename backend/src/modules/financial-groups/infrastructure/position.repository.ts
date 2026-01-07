@@ -9,6 +9,7 @@ export interface IPositionRepository {
     amount: number;
     positionType: PositionType;
     frequencyType: FrequencyType;
+    date: Date;
     notes?: string;
     category?: string;
     interestRate?: number;
@@ -22,6 +23,7 @@ export interface IPositionRepository {
       amount: number;
       positionType: PositionType;
       frequencyType: FrequencyType;
+      date: Date;
       notes?: string;
       category?: string;
       interestRate?: number;
@@ -38,6 +40,7 @@ export class PositionRepository implements IPositionRepository {
     amount: number;
     positionType: PositionType;
     frequencyType: FrequencyType;
+    date: Date;
     notes?: string;
     category?: string;
     interestRate?: number;
@@ -48,6 +51,7 @@ export class PositionRepository implements IPositionRepository {
       amount: params.amount,
       positionType: params.positionType,
       frequencyType: params.frequencyType,
+      date: params.date,
       notes: params.notes,
       category: params.category,
       interestRate: params.interestRate,
@@ -70,6 +74,7 @@ export class PositionRepository implements IPositionRepository {
       amount: number;
       positionType: PositionType;
       frequencyType: FrequencyType;
+      date: Date;
       notes?: string;
       category?: string;
       interestRate?: number;

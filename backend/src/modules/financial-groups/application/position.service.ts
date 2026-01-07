@@ -41,6 +41,7 @@ export class PositionService implements IPositionService {
       amount: number;
       positionType: PositionType;
       frequencyType: FrequencyType;
+      date: Date;
       notes?: string;
       category?: string;
       interestRate?: number;
@@ -50,6 +51,7 @@ export class PositionService implements IPositionService {
       amount: input.amount,
       positionType: input.positionType,
       frequencyType: input.frequencyType,
+      date: input.date,
     };
 
     if (input.notes !== undefined) params.notes = input.notes;
@@ -64,6 +66,7 @@ export class PositionService implements IPositionService {
       amount: position.amount,
       positionType: position.positionType,
       frequencyType: position.frequencyType,
+      date: position.date,
       notes: position.notes,
       category: position.category,
       interestRate: position.interestRate,
@@ -85,6 +88,7 @@ export class PositionService implements IPositionService {
       amount?: number;
       positionType?: PositionType;
       frequencyType?: FrequencyType;
+      date?: Date;
       notes?: string;
       category?: string;
       interestRate?: number;
@@ -94,6 +98,7 @@ export class PositionService implements IPositionService {
     if (input.amount !== undefined) update.amount = input.amount;
     if (input.positionType !== undefined) update.positionType = input.positionType;
     if (input.frequencyType !== undefined) update.frequencyType = input.frequencyType;
+    if (input.date !== undefined) update.date = input.date;
     if (input.notes !== undefined) update.notes = input.notes;
     if (input.category !== undefined) update.category = input.category;
     if (input.interestRate !== undefined) update.interestRate = input.interestRate;
@@ -113,6 +118,7 @@ export class PositionService implements IPositionService {
       amount: position.amount,
       positionType: position.positionType,
       frequencyType: position.frequencyType,
+      date: position.date,
       notes: position.notes,
       category: position.category,
       interestRate: position.interestRate,

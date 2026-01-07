@@ -81,6 +81,7 @@ export class FinancialGroupService implements IFinancialGroupService {
         amount: p.amount,
         positionType: p.positionType,
         frequencyType: p.frequencyType,
+        date: p.date.toISOString(),
         notes: p.notes,
         category: p.category,
         interestRate: p.interestRate,

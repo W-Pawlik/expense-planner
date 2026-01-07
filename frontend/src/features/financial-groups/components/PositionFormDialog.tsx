@@ -40,6 +40,7 @@ export const PositionFormDialog = ({
       amount: initialValues?.amount ?? 0,
       positionType: initialValues?.positionType ?? "INCOME",
       frequencyType: initialValues?.frequencyType ?? "RECURRING",
+      date: initialValues?.date ?? new Date().toISOString().slice(0, 10),
       notes: initialValues?.notes ?? "",
       category: initialValues?.category ?? "",
       interestRate: initialValues?.interestRate ?? undefined,
@@ -53,6 +54,7 @@ export const PositionFormDialog = ({
       amount: initialValues?.amount ?? 0,
       positionType: initialValues?.positionType ?? "INCOME",
       frequencyType: initialValues?.frequencyType ?? "RECURRING",
+      date: initialValues?.date ?? new Date().toISOString().slice(0, 10),
       notes: initialValues?.notes ?? "",
       category: initialValues?.category ?? "",
       interestRate: initialValues?.interestRate ?? undefined,
@@ -145,6 +147,22 @@ export const PositionFormDialog = ({
               )}
             />
           </Stack>
+
+          <Controller
+            name="date"
+            control={control}
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                type="date"
+                label="Date"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
+              />
+            )}
+          />
 
           <Controller
             name="category"
