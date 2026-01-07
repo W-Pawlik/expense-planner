@@ -13,6 +13,7 @@ export const CreatePositionSchema = z.object({
   frequencyType: z.custom<FrequencyType>(
     (v) => v === "RECURRING" || v === "ONE_TIME"
   ),
+  date: z.string().min(1, "Date is required"),
   notes: z.string().max(500).optional().nullable(),
   category: z.string().max(100).optional().nullable(),
   interestRate: z.number().optional().nullable(),
@@ -23,6 +24,7 @@ export const PositionSchema = z.object({
   amount: z.number().min(0, "Amount must be positive"),
   positionType: z.enum(["INCOME", "EXPENSE"]),
   frequencyType: z.enum(["RECURRING", "ONE_TIME"]),
+  date: z.string().min(1, "Date is required"),
   category: z.string().min(1, "Category is required"),
   notes: z.string().optional(),
   interestRate: z.number().min(0).max(100).optional(),

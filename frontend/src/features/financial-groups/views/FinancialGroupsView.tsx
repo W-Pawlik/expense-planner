@@ -267,6 +267,13 @@ export const FinancialGroupsView = () => {
             <FinancialProjectionChart
               positions={positions}
               projectionYears={selectedGroup.projectionYears}
+              onProjectionChange={(years) => {
+                if (!selectedGroup) return;
+                updateGroupMutation.mutate({
+                  groupId: selectedGroup.id,
+                  changes: { projectionYears: years },
+                });
+              }}
             />
 
             <FinancialPositionsList
@@ -348,6 +355,7 @@ export const FinancialGroupsView = () => {
                 amount: editingPosition.amount,
                 positionType: editingPosition.positionType,
                 frequencyType: editingPosition.frequencyType,
+                date: editingPosition.date.slice(0, 10),
                 notes: editingPosition.notes ?? "",
                 category: editingPosition.category ?? "",
                 interestRate: editingPosition.interestRate ?? undefined,

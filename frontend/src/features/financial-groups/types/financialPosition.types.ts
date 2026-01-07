@@ -8,6 +8,7 @@ export interface FinancialPosition {
   amount: number;
   positionType: PositionType;
   frequencyType: FrequencyType;
+  date: string;
   notes?: string | null;
   category?: string | null;
   interestRate?: number | null;

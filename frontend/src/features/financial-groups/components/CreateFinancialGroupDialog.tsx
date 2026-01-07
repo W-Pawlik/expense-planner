@@ -88,11 +88,15 @@ export const CreateFinancialGroupDialog = ({
             control={control}
             render={({ field, fieldState }) => (
               <TextField
-                {...field}
-                type="number"
                 label="Projection years"
+                type="number"
                 fullWidth
                 inputProps={{ min: 1, max: 50 }}
+                value={field.value ?? ""}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  field.onChange(v === "" ? undefined : Number(v));
+                }}
                 error={!!fieldState.error}
                 helperText={fieldState.error?.message}
               />

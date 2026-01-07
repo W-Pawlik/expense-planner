@@ -10,6 +10,7 @@ export const createPositionSchema = z.object({
   amount: z.number().positive(),
   positionType: positionTypeSchema,
   frequencyType: frequencyTypeSchema,
+  date: z.coerce.date(),
   notes: z.string().max(500).optional(),
   category: z.string().max(100).optional(),
   interestRate: z.number().min(0).optional(),

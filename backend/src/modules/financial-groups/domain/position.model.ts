@@ -9,6 +9,7 @@ export interface FinancialPositionDocument extends Document {
   amount: number;
   positionType: PositionType;
   frequencyType: FrequencyType;
+  date: Date;
   notes?: string;
   category?: string;
   interestRate?: number;
@@ -23,6 +24,7 @@ const financialPositionSchema = new Schema<FinancialPositionDocument>(
     amount: { type: Number, required: true },
     positionType: { type: String, enum: Object.values(PositionType), required: true },
     frequencyType: { type: String, enum: Object.values(FrequencyType), required: true },
+    date: { type: Date, required: true, default: Date.now },
     notes: { type: String },
     category: { type: String },
     interestRate: { type: Number },
