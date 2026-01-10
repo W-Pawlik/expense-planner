@@ -7,6 +7,8 @@ import { financialGroupsRoutes } from "./features/financial-groups/routes";
 import { RequireAuth } from "./features/auth/components/guards/RequireAuth";
 import { RequireGuest } from "./features/auth/components/guards/RequireGuest";
 import { accountRoutes } from "./features/account/routes";
+import { publicBoardRoutes } from "./features/public-board/routes";
+import { adminRoutes } from "./features/admin/routes";
 
 const routes: RouteObject[] = [
   {
@@ -18,8 +20,13 @@ const routes: RouteObject[] = [
       },
       {
         element: <RequireAuth />,
-        children: [...financialGroupsRoutes, ...accountRoutes],
+        children: [
+          ...financialGroupsRoutes,
+          ...accountRoutes,
+          ...publicBoardRoutes,
+        ],
       },
+      ...adminRoutes,
     ],
   },
 ];

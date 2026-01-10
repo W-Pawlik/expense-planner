@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ListBoardPostsQuery } from '../../modules/board-post.model.ts/domain/board.types';
+import { ListBoardPostsQuery } from '../../modules/board-post.model.ts/domain/board.schemas';
 import { BoardService } from '../../modules/board-post.model.ts/application/board.service';
 
 const boardService = new BoardService();

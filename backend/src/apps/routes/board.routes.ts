@@ -9,7 +9,7 @@ import {
 export const createBoardRouter = (): Router => {
   const router = Router();
 
-  router.get('/', validateRequest(listBoardPostsQuerySchema, 'query'), getPublicBoard);
+  router.get('/public', validateRequest(listBoardPostsQuerySchema, 'query'), getPublicBoard);
 
   router.get('/:postId', validateRequest(boardPostIdParamsSchema, 'params'), getPublicBoardPost);
 

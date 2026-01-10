@@ -11,9 +11,11 @@ import {
   UpdatePositionInput,
 } from '../../modules/financial-groups/domain/position.types';
 import { AppError } from '../../core/errors/AppError';
+import { BoardService } from '../../modules/board-post.model.ts/application/board.service';
 
 const groupService = new FinancialGroupService();
 const positionService = new PositionService();
+const boardService = new BoardService();
 
 export const createGroup = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -75,8 +77,15 @@ export const changeVisibility = async (req: Request, res: Response, next: NextFu
 
     const { groupId } = req.params as { groupId: string };
     const input = req.body as ChangeVisibilityInput;
+    const { visibilityStatus } = input;
 
     const group = await groupService.changeVisibility(userId, groupId, input);
+
+    if (visibilityStatus === 'PUBLIC') {
+      await boardService.ensurePostForGroup(groupId, userId, group.description ?? undefined);
+    } else {
+      await boardService.hidePostForGroup(groupId);
+    }
     res.json(group);
   } catch (err) {
     next(err);
