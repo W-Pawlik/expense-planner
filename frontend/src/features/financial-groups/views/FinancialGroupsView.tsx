@@ -14,6 +14,7 @@ import {
   Snackbar,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useFinancialGroups } from "../hooks/useFinancialGroups";
 import { useCreateFinancialGroup } from "../hooks/useCreateFinancialGroup";
 import { useUpdateFinancialGroup } from "../hooks/useUpdateFinancialGroup";
@@ -38,8 +39,10 @@ import type { CreatePositionInput } from "../models/createPosition.schema";
 import { PositionFormDialog } from "../components/PositionFormDialog";
 import { boardUserService } from "../../public-board/services/boardUserService";
 import { useChangeGroupVisibility } from "../hooks/useChangeGroupVisibility";
+import { financialGroupsQueryKeys } from "../consts/financialGroupsQueryKeys";
 
 export const FinancialGroupsView = () => {
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, error } = useFinancialGroups();
   const createGroupMutation = useCreateFinancialGroup();
   const updateGroupMutation = useUpdateFinancialGroup();
@@ -146,6 +149,10 @@ export const FinancialGroupsView = () => {
       await changeVisibilityMutation.mutateAsync({
         groupId: selectedGroup.id,
         visibilityStatus: nextStatus,
+      });
+
+      queryClient.refetchQueries({
+        queryKey: financialGroupsQueryKeys.details(selectedGroup.id),
       });
 
       if (nextStatus === "PUBLIC") {

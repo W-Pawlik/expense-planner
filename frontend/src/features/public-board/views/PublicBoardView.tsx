@@ -2,12 +2,27 @@ import { useState } from "react";
 import { Box, Typography, CircularProgress, Alert } from "@mui/material";
 import { usePublicBoard } from "../hooks/usePublicBoard";
 import { PublicBoardList } from "../components/PublicBoardList";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { boardUserService } from "../services/boardUserService";
+import { useUserData } from "../../auth/hooks/useUserData";
 
 const PAGE_SIZE = 10;
 
 export const PublicBoardView = () => {
   const [page, setPage] = useState(1);
   const { data, isLoading, isError, error } = usePublicBoard(page, PAGE_SIZE);
+
+  const { data: userData } = useUserData();
+  const isAdmin = userData?.role === "ADMIN";
+  const currentUserId = userData?.id;
+
+  const queryClient = useQueryClient();
+  const hideMutation = useMutation({
+    mutationFn: (groupId: string) => boardUserService.hideGroup(groupId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["publicBoard"] });
+    },
+  });
 
   if (isLoading) {
     return (
@@ -39,6 +54,11 @@ export const PublicBoardView = () => {
         limit={PAGE_SIZE}
         total={total}
         onPageChange={setPage}
+        canHide={(post) =>
+          !!currentUserId && (isAdmin || post.authorId === currentUserId)
+        }
+        onHide={(post) => hideMutation.mutate(post.groupId)}
+        isHiding={hideMutation.isPending}
       />
     </Box>
   );

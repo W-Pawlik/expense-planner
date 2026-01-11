@@ -5,8 +5,13 @@ import {
   ListBoardPostsQuery,
   BoardPostIdParams,
 } from '../../modules/board-post.model.ts/domain/board.types';
+import { FinancialGroupService } from '../../modules/financial-groups/application/group.service';
+import { VisibilityStatus } from '../../core/enums/isibilityStatus.enum';
+import { BoardService } from '../../modules/board-post.model.ts/application/board.service';
 
 const adminService = new AdminService();
+const groupService = new FinancialGroupService();
+const boardService = new BoardService();
 
 export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -52,6 +57,12 @@ export const rejectBoardPost = async (req: Request, res: Response, next: NextFun
   try {
     const { postId } = req.params as unknown as BoardPostIdParams;
     await adminService.rejectBoardPost(postId);
+
+    const post = await boardService.getPost(postId);
+
+    await groupService.changeVisibility(post.authorId, post.groupId, {
+      visibilityStatus: VisibilityStatus.PRIVATE,
+    });
     res.status(204).send();
   } catch (err) {
     next(err);

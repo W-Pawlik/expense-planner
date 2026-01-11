@@ -5,6 +5,7 @@ import {
   Typography,
   Stack,
   Pagination,
+  Button,
 } from "@mui/material";
 import type { PublicBoardPost } from "../types/publicBoard.types";
 
@@ -14,6 +15,10 @@ interface PublicBoardListProps {
   limit: number;
   total: number;
   onPageChange: (page: number) => void;
+
+  canHide?: (post: PublicBoardPost) => boolean;
+  onHide?: (post: PublicBoardPost) => void;
+  isHiding?: boolean;
 }
 
 export const PublicBoardList = ({
@@ -22,6 +27,9 @@ export const PublicBoardList = ({
   limit,
   total,
   onPageChange,
+  canHide,
+  onHide,
+  isHiding,
 }: PublicBoardListProps) => {
   const pageCount = Math.max(1, Math.ceil(total / limit));
 
@@ -45,19 +53,42 @@ export const PublicBoardList = ({
           }}
         >
           <CardContent>
-            <Typography variant="subtitle1" gutterBottom>
-              Public plan #{post.groupId.slice(-6)}
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: 2,
+              }}
+            >
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Public plan #{post.groupId.slice(-6)}
+                </Typography>
 
-            {post.description && (
-              <Typography variant="body2" sx={{ mb: 1.5 }}>
-                {post.description}
-              </Typography>
-            )}
+                {post.description && (
+                  <Typography variant="body2" sx={{ mb: 1.5 }}>
+                    {post.description}
+                  </Typography>
+                )}
 
-            <Typography variant="caption" color="text.secondary">
-              Published: {new Date(post.createdAt).toLocaleString()}
-            </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Published: {new Date(post.createdAt).toLocaleString()}
+                </Typography>
+              </Box>
+
+              {canHide?.(post) && (
+                <Button
+                  size="small"
+                  color="warning"
+                  variant="outlined"
+                  onClick={() => onHide?.(post)}
+                  disabled={isHiding}
+                >
+                  Hide
+                </Button>
+              )}
+            </Box>
           </CardContent>
         </Card>
       ))}

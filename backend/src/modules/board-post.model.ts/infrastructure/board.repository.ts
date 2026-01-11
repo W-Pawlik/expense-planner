@@ -110,6 +110,10 @@ export class BoardPostRepository implements IBoardPostRepository {
     return BoardPostModel.findById(postId).exec();
   }
 
+  public async findByGroupId(groupId: string): Promise<BoardPostDocument | null> {
+    return BoardPostModel.findOne({ groupId }).exec();
+  }
+
   public async setApprovalStatus(
     postId: string,
     approvalStatus: ApprovalStatus,

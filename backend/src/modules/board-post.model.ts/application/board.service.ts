@@ -71,6 +71,12 @@ export class BoardService implements IBoardService {
     return this.toDTO(post);
   }
 
+  public async getPost(postId: string): Promise<BoardPostDTO> {
+    const post = await this.boardRepository.findById(postId);
+    if (!post) throw new AppError('Board post not found', 404);
+    return this.toDTO(post);
+  }
+
   public async listPendingPosts(page: number, limit: number): Promise<ListBoardPostsResult> {
     const { posts, total } = await this.boardRepository.findPending(page, limit);
 
@@ -94,6 +100,11 @@ export class BoardService implements IBoardService {
     if (!post) {
       throw new AppError('Board post not found', 404);
     }
+  }
+
+  public async getPostByGroupId(groupId: string): Promise<BoardPostDTO | null> {
+    const post = await this.boardRepository.findByGroupId(groupId);
+    return post ? this.toDTO(post) : null;
   }
 
   private toDTO(p: any): BoardPostDTO {

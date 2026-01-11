@@ -45,6 +45,7 @@ export const boardUserService: IBoardUserService = {
       token,
       {
         method: "POST",
+        headers: httpClient.jsonHeaders,
       }
     );
   },
