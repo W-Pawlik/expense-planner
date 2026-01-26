@@ -13,6 +13,7 @@ export interface IBoardService {
   removePostForGroup(groupId: string): Promise<void>;
   listPublicPosts(page: number, limit: number): Promise<ListBoardPostsResult>;
   getPublicPost(postId: string): Promise<BoardPostDTO>;
+  getPublicPostByGroupId(groupId: string): Promise<BoardPostDTO>;
   listPendingPosts(page: number, limit: number): Promise<ListBoardPostsResult>;
   approvePost(postId: string): Promise<void>;
   rejectPost(postId: string): Promise<void>;
@@ -73,6 +74,12 @@ export class BoardService implements IBoardService {
 
   public async getPost(postId: string): Promise<BoardPostDTO> {
     const post = await this.boardRepository.findById(postId);
+    if (!post) throw new AppError('Board post not found', 404);
+    return this.toDTO(post);
+  }
+
+  public async getPublicPostByGroupId(groupId: string): Promise<BoardPostDTO> {
+    const post = await this.boardRepository.findPublicByGroupId(groupId);
     if (!post) throw new AppError('Board post not found', 404);
     return this.toDTO(post);
   }

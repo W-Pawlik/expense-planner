@@ -1,4 +1,8 @@
+import type { VisibilityStatus } from "../../financial-groups/types/financialGroup.types";
+import type { FinancialPosition } from "../../financial-groups/types/financialPosition.types";
+
 export interface PublicBoardPost {
+  groupName: string;
   id: string;
   groupId: string;
   authorId: string;
@@ -14,4 +18,18 @@ export interface PublicBoardPage {
   total: number;
   page: number;
   limit: number;
+}
+
+export interface PublicPlanDetails {
+  publishedAt: string;
+  group: {
+    id: string;
+    name: string;
+    projectionYears: number;
+    visibilityStatus: VisibilityStatus;
+    description?: string;
+    createdAt: string;
+    updatedAt: string;
+    positions: FinancialPosition[];
+  };
 }

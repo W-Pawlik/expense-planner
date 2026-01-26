@@ -17,6 +17,8 @@ import MuiAlert, { type AlertProps } from "@mui/material/Alert";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { usePendingBoardPosts } from "../hooks/usePendingBoardPosts";
 import { useApproveBoardPost } from "../hooks/useApproveBoardPost";
 import { useRejectBoardPost } from "../hooks/useRejectBoardPost";
@@ -32,9 +34,12 @@ const formatDateTime = (iso: string) => {
 };
 
 export const AdminBoardView = () => {
-  const [page, setPage] = useState(1); // 1-based
+  const navigate = useNavigate();
+
+  const [page, setPage] = useState(1);
   const limit = 10;
 
+  // ✅ TO MUSI BYĆ lista pending postów
   const { data, isLoading, isError, error, isFetching } = usePendingBoardPosts(
     page,
     limit
@@ -48,6 +53,9 @@ export const AdminBoardView = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState<
     "success" | "error" | "info"
   >("info");
+
+  const isBusy =
+    isFetching || approveMutation.isPending || rejectMutation.isPending;
 
   const handleApprove = async (post: AdminBoardPost) => {
     try {
@@ -81,10 +89,7 @@ export const AdminBoardView = () => {
 
   const total = data?.total ?? 0;
   const totalPages = total > 0 ? Math.ceil(total / limit) : 1;
-  const posts = data?.posts ?? [];
-
-  const isBusy =
-    isFetching || approveMutation.isPending || rejectMutation.isPending;
+  const posts: AdminBoardPost[] = data?.posts ?? [];
 
   if (isLoading && !data) {
     return (
@@ -106,7 +111,7 @@ export const AdminBoardView = () => {
         alignItems="center"
         mb={3}
       >
-        <Typography variant="h4">Admin &mdash; Board moderation</Typography>
+        <Typography variant="h4">Admin — Board moderation</Typography>
         {isBusy && <CircularProgress size={24} />}
       </Stack>
 
@@ -119,19 +124,32 @@ export const AdminBoardView = () => {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Group ID</TableCell>
-                <TableCell>Author ID</TableCell>
+                <TableCell>Group</TableCell>
                 <TableCell>Description</TableCell>
                 <TableCell>Created</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
               {posts.map((post) => (
-                <TableRow key={post.id} hover>
-                  <TableCell>{post.groupId}</TableCell>
-                  <TableCell>{post.authorId}</TableCell>
-                  <TableCell sx={{ maxWidth: 320 }}>
+                <TableRow
+                  key={post.id}
+                  hover
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => navigate(`/admin/board/${post.id}`)}
+                >
+                  <TableCell>
+                    <Typography
+                      variant="body2"
+                      noWrap
+                      title={post.groupName ?? ""}
+                    >
+                      {post.groupName ?? "Unknown group"}
+                    </Typography>
+                  </TableCell>
+
+                  <TableCell sx={{ maxWidth: 420 }}>
                     <Typography
                       variant="body2"
                       noWrap
@@ -140,7 +158,9 @@ export const AdminBoardView = () => {
                       {post.description || "—"}
                     </Typography>
                   </TableCell>
+
                   <TableCell>{formatDateTime(post.createdAt)}</TableCell>
+
                   <TableCell align="right">
                     <Stack
                       direction="row"
@@ -151,15 +171,22 @@ export const AdminBoardView = () => {
                         size="small"
                         color="success"
                         disabled={isBusy}
-                        onClick={() => handleApprove(post)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleApprove(post);
+                        }}
                       >
                         <CheckIcon fontSize="small" />
                       </IconButton>
+
                       <IconButton
                         size="small"
                         color="error"
                         disabled={isBusy}
-                        onClick={() => handleReject(post)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReject(post);
+                        }}
                       >
                         <CloseIcon fontSize="small" />
                       </IconButton>

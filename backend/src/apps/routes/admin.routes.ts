@@ -31,6 +31,12 @@ export const createAdminRouter = (): Router => {
     adminController.getPendingBoardPosts,
   );
 
+  router.get(
+    '/board/pending/:postId',
+    validateRequest(boardPostIdParamsSchema, 'params'),
+    adminController.getPendingBoardPostDetails,
+  );
+
   router.post(
     '/board/posts/:postId/approve',
     validateRequest(boardPostIdParamsSchema, 'params'),

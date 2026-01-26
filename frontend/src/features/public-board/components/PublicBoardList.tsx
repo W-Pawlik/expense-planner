@@ -7,6 +7,7 @@ import {
   Pagination,
   Button,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import type { PublicBoardPost } from "../types/publicBoard.types";
 
 interface PublicBoardListProps {
@@ -32,6 +33,7 @@ export const PublicBoardList = ({
   isHiding,
 }: PublicBoardListProps) => {
   const pageCount = Math.max(1, Math.ceil(total / limit));
+  const navigate = useNavigate();
 
   if (!posts.length) {
     return (
@@ -46,10 +48,13 @@ export const PublicBoardList = ({
       {posts.map((post) => (
         <Card
           key={post.id}
+          onClick={() => navigate(`/board/${post.groupId}`)} // ✅ przejście do detali
           sx={{
             backgroundColor: "background.paper",
             borderRadius: 1,
             border: "1px solid rgba(148,163,184,0.3)",
+            cursor: "pointer",
+            "&:hover": { borderColor: "primary.main" },
           }}
         >
           <CardContent>
@@ -62,8 +67,9 @@ export const PublicBoardList = ({
               }}
             >
               <Box sx={{ minWidth: 0 }}>
+                {/* ✅ NAZWA GRUPY, bez ID */}
                 <Typography variant="subtitle1" gutterBottom>
-                  Public plan #{post.groupId.slice(-6)}
+                  {post.groupName}
                 </Typography>
 
                 {post.description && (
@@ -82,7 +88,10 @@ export const PublicBoardList = ({
                   size="small"
                   color="warning"
                   variant="outlined"
-                  onClick={() => onHide?.(post)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // ✅ żeby nie otwierało detali
+                    onHide?.(post);
+                  }}
                   disabled={isHiding}
                 >
                   Hide

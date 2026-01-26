@@ -12,6 +12,14 @@ export interface IFinancialGroupService {
   updateGroup(userId: string, groupId: string, input: UpdateGroupInput): Promise<any>;
   changeVisibility(userId: string, groupId: string, input: ChangeVisibilityInput): Promise<any>;
   deleteGroup(userId: string, groupId: string): Promise<void>;
+  getPublicGroupSummary(
+    groupId: string,
+  ): Promise<{ id: string; name: string; description?: string | null } | null>;
+  getPublicGroupWithPositions(groupId: string): Promise<any>;
+  getGroupSummaryById(
+    groupId: string,
+  ): Promise<{ id: string; name: string; description?: string | null } | null>;
+  getGroupWithPositionsById(groupId: string): Promise<any>;
 }
 
 export class FinancialGroupService implements IFinancialGroupService {
@@ -130,12 +138,14 @@ export class FinancialGroupService implements IFinancialGroupService {
       visibilityStatus: input.visibilityStatus,
     });
 
-    if (!group) {
-      throw new AppError('Group not found', 404);
-    }
+    if (!group) throw new AppError('Group not found', 404);
 
     if (group.visibilityStatus === VisibilityStatus.PUBLIC) {
-      await this.boardService.ensurePostForGroup(group._id.toString(), userId);
+      await this.boardService.ensurePostForGroup(
+        group._id.toString(),
+        userId,
+        group.description ?? undefined,
+      );
     } else {
       await this.boardService.hidePostForGroup(group._id.toString());
     }
@@ -159,5 +169,92 @@ export class FinancialGroupService implements IFinancialGroupService {
 
     await this.positionRepository.deleteManyByGroupId(groupId);
     await this.boardService.removePostForGroup(groupId);
+  }
+
+  public async getPublicGroupSummary(groupId: string) {
+    const group = await this.groupRepository.findById(groupId);
+    if (!group) return null;
+    if (group.visibilityStatus !== VisibilityStatus.PUBLIC) return null;
+
+    return {
+      id: group._id.toString(),
+      name: group.name,
+      description: group.description ?? null,
+    };
+  }
+
+  public async getPublicGroupWithPositions(groupId: string) {
+    const group = await this.groupRepository.findById(groupId);
+    if (!group) throw new AppError('Group not found', 404);
+
+    if (group.visibilityStatus !== VisibilityStatus.PUBLIC) {
+      throw new AppError('Group not found', 404);
+    }
+
+    const positions = await this.positionRepository.findAllByGroup(groupId);
+
+    return {
+      id: group._id.toString(),
+      name: group.name,
+      projectionYears: group.projectionYears,
+      visibilityStatus: group.visibilityStatus,
+      description: group.description,
+      createdAt: group.createdAt,
+      updatedAt: group.updatedAt,
+      positions: positions.map((p) => ({
+        id: p._id.toString(),
+        name: p.name,
+        amount: p.amount,
+        positionType: p.positionType,
+        frequencyType: p.frequencyType,
+        date: p.date.toISOString(),
+        notes: p.notes,
+        category: p.category,
+        interestRate: p.interestRate,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+      })),
+    };
+  }
+
+  public async getGroupSummaryById(groupId: string) {
+    const group = await this.groupRepository.findById(groupId);
+    if (!group) return null;
+
+    return {
+      id: group._id.toString(),
+      name: group.name,
+      description: group.description ?? null,
+    };
+  }
+
+  public async getGroupWithPositionsById(groupId: string) {
+    const group = await this.groupRepository.findById(groupId);
+    if (!group) throw new AppError('Group not found', 404);
+
+    const positions = await this.positionRepository.findAllByGroup(groupId);
+
+    return {
+      id: group._id.toString(),
+      name: group.name,
+      projectionYears: group.projectionYears,
+      visibilityStatus: group.visibilityStatus,
+      description: group.description,
+      createdAt: group.createdAt,
+      updatedAt: group.updatedAt,
+      positions: positions.map((p) => ({
+        id: p._id.toString(),
+        name: p.name,
+        amount: p.amount,
+        positionType: p.positionType,
+        frequencyType: p.frequencyType,
+        date: p.date.toISOString(),
+        notes: p.notes,
+        category: p.category,
+        interestRate: p.interestRate,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+      })),
+    };
   }
 }

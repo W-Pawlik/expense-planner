@@ -9,6 +9,7 @@ export interface IFinancialGroupRepository {
     visibilityStatus: VisibilityStatus;
     description?: string | null;
   }): Promise<FinancialGroupDocument>;
+  findById(groupId: string): Promise<FinancialGroupDocument | null>;
   findByIdAndOwner(groupId: string, ownerId: string): Promise<FinancialGroupDocument | null>;
   findAllByOwner(ownerId: string): Promise<FinancialGroupDocument[]>;
   updateByIdAndOwner(
@@ -41,6 +42,10 @@ export class FinancialGroupRepository implements IFinancialGroupRepository {
     });
 
     return group.save();
+  }
+
+  public async findById(groupId: string): Promise<FinancialGroupDocument | null> {
+    return FinancialGroupModel.findById(groupId).exec();
   }
 
   public async findByIdAndOwner(

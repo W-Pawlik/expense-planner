@@ -2,6 +2,7 @@ import { Express, Router } from 'express';
 import {
   getPublicBoard,
   getPublicBoardPost,
+  getPublicPlanDetails,
   hideGroupOnBoard,
 } from '../controlers/board.controller';
 import { validateRequest } from '../../core/middleware/validateRequest';
@@ -16,6 +17,12 @@ export const createBoardRouter = (): Router => {
   const router = Router();
 
   router.get('/public', validateRequest(listBoardPostsQuerySchema, 'query'), getPublicBoard);
+
+  router.get(
+    '/public/groups/:groupId',
+    validateRequest(groupIdParamsSchema, 'params'),
+    getPublicPlanDetails,
+  );
 
   router.get('/:postId', validateRequest(boardPostIdParamsSchema, 'params'), getPublicBoardPost);
 

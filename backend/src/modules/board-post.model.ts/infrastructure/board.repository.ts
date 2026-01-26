@@ -12,6 +12,7 @@ export interface IBoardPostRepository {
   deleteForGroup(groupId: string): Promise<void>;
   findPublic(page: number, limit: number): Promise<{ posts: BoardPostDocument[]; total: number }>;
   findPublicById(postId: string): Promise<BoardPostDocument | null>;
+  findPublicByGroupId(groupId: string): Promise<BoardPostDocument | null>;
   findPending(page: number, limit: number): Promise<{ posts: BoardPostDocument[]; total: number }>;
   findById(postId: string): Promise<BoardPostDocument | null>;
   setApprovalStatus(
@@ -83,6 +84,14 @@ export class BoardPostRepository implements IBoardPostRepository {
   public async findPublicById(postId: string): Promise<BoardPostDocument | null> {
     return BoardPostModel.findOne({
       _id: postId,
+      publicationStatus: PublicationStatus.VISIBLE,
+      approvalStatus: ApprovalStatus.APPROVED,
+    }).exec();
+  }
+
+  public async findPublicByGroupId(groupId: string): Promise<BoardPostDocument | null> {
+    return BoardPostModel.findOne({
+      groupId,
       publicationStatus: PublicationStatus.VISIBLE,
       approvalStatus: ApprovalStatus.APPROVED,
     }).exec();
