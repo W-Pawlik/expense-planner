@@ -1,17 +1,37 @@
 import { Express, Router } from 'express';
-import { getPublicBoard, getPublicBoardPost } from '../controlers/board.controller';
+import {
+  getPublicBoard,
+  getPublicBoardPost,
+  getPublicPlanDetails,
+  hideGroupOnBoard,
+} from '../controlers/board.controller';
 import { validateRequest } from '../../core/middleware/validateRequest';
 import {
   boardPostIdParamsSchema,
   listBoardPostsQuerySchema,
 } from '../../modules/board-post.model.ts/domain/board.schemas';
+import { groupIdParamsSchema } from '../../modules/financial-groups/domain/group.schemas';
+import { authMiddleware } from '../../core/middleware/auth.middleware';
 
 export const createBoardRouter = (): Router => {
   const router = Router();
 
-  router.get('/', validateRequest(listBoardPostsQuerySchema, 'query'), getPublicBoard);
+  router.get('/public', validateRequest(listBoardPostsQuerySchema, 'query'), getPublicBoard);
+
+  router.get(
+    '/public/groups/:groupId',
+    validateRequest(groupIdParamsSchema, 'params'),
+    getPublicPlanDetails,
+  );
 
   router.get('/:postId', validateRequest(boardPostIdParamsSchema, 'params'), getPublicBoardPost);
+
+  router.post(
+    '/groups/:groupId/hide',
+    authMiddleware,
+    validateRequest(groupIdParamsSchema, 'params'),
+    hideGroupOnBoard,
+  );
 
   return router;
 };

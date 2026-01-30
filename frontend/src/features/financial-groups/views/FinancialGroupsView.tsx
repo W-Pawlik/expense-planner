@@ -11,8 +11,10 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  Snackbar,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useFinancialGroups } from "../hooks/useFinancialGroups";
 import { useCreateFinancialGroup } from "../hooks/useCreateFinancialGroup";
 import { useUpdateFinancialGroup } from "../hooks/useUpdateFinancialGroup";
@@ -35,17 +37,25 @@ import { useDeletePosition } from "../hooks/useDeletePosition";
 import type { FinancialPosition } from "../types/financialPosition.types";
 import type { CreatePositionInput } from "../models/createPosition.schema";
 import { PositionFormDialog } from "../components/PositionFormDialog";
+import { boardUserService } from "../../public-board/services/boardUserService";
+import { useChangeGroupVisibility } from "../hooks/useChangeGroupVisibility";
+import { financialGroupsQueryKeys } from "../consts/financialGroupsQueryKeys";
 
 export const FinancialGroupsView = () => {
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, error } = useFinancialGroups();
   const createGroupMutation = useCreateFinancialGroup();
   const updateGroupMutation = useUpdateFinancialGroup();
   const deleteGroupMutation = useDeleteFinancialGroup();
+  const changeVisibilityMutation = useChangeGroupVisibility();
 
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [visibilityDialogOpen, setVisibilityDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isVisibilityChanging, setIsVisibilityChanging] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const [positionDialogOpen, setPositionDialogOpen] = useState(false);
   const [positionDialogMode, setPositionDialogMode] = useState<
@@ -129,17 +139,39 @@ export const FinancialGroupsView = () => {
     setVisibilityDialogOpen(true);
   };
 
-  const handleConfirmVisibilityChange = () => {
+  const handleConfirmVisibilityChange = async () => {
     if (!selectedGroup) return;
+
     const nextStatus: VisibilityStatus =
       selectedGroup.visibilityStatus === "PUBLIC" ? "PRIVATE" : "PUBLIC";
 
-    updateGroupMutation.mutate({
-      groupId: selectedGroup.id,
-      changes: { visibilityStatus: nextStatus },
-    });
+    try {
+      await changeVisibilityMutation.mutateAsync({
+        groupId: selectedGroup.id,
+        visibilityStatus: nextStatus,
+      });
 
-    setVisibilityDialogOpen(false);
+      queryClient.refetchQueries({
+        queryKey: financialGroupsQueryKeys.details(selectedGroup.id),
+      });
+
+      if (nextStatus === "PUBLIC") {
+        setSnackbarMessage(
+          "Your group is now public and will appear on the public board after admin approval."
+        );
+      } else {
+        setSnackbarMessage(
+          "Your group is now private and hidden from the public board."
+        );
+      }
+
+      setSnackbarOpen(true);
+      setVisibilityDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to change visibility", err);
+      setSnackbarMessage("Could not change visibility. Please try again.");
+      setSnackbarOpen(true);
+    }
   };
 
   const handleDeleteRequest = () => {
@@ -202,7 +234,9 @@ export const FinancialGroupsView = () => {
     deleteGroupMutation.isPending ||
     createPositionMutation.isPending ||
     updatePositionMutation.isPending ||
-    deletePositionMutation.isPending;
+    deletePositionMutation.isPending ||
+    isVisibilityChanging ||
+    changeVisibilityMutation.isPending;
 
   if (isLoading) {
     return (
@@ -375,6 +409,24 @@ export const FinancialGroupsView = () => {
           deletePositionMutation.isPending
         }
       />
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={(_, reason) => {
+          if (reason === "clickaway") return;
+          setSnackbarOpen(false);
+        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="info"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

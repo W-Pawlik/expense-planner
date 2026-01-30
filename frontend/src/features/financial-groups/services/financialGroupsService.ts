@@ -21,6 +21,10 @@ export interface IFinancialGroupsService {
     changes: UpdateFinancialGroupInput
   ): Promise<FinancialGroupDetails>;
   deleteFinancialGroup(groupId: string): Promise<void>;
+  changeVisibility(params: {
+    groupId: string;
+    visibilityStatus: VisibilityStatus;
+  }): Promise<FinancialGroupSummary>;
 }
 
 const requireToken = () => {
@@ -89,6 +93,21 @@ export const financialGroupsService: IFinancialGroupsService = {
       token,
       {
         method: "DELETE",
+      }
+    );
+  },
+
+  async changeVisibility({ groupId, visibilityStatus }) {
+    const token = authStorage.getToken();
+    if (!token) throw new Error("No auth token");
+
+    return httpClient.requestAuthJson<FinancialGroupSummary>(
+      `/groups/${groupId}/visibility`,
+      token,
+      {
+        method: "PATCH",
+        headers: httpClient.jsonHeaders,
+        body: JSON.stringify({ visibilityStatus }),
       }
     );
   },

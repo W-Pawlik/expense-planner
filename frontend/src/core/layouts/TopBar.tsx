@@ -63,6 +63,7 @@ export const TopBar = () => {
   const token = authStorage.getToken();
   const isAuthResolving = !!token && isLoading;
   const isAuthenticated = !!userData;
+  const isAdmin = userData?.role === "ADMIN";
 
   const isPublicAuthScreen = publicAuthPaths.has(location.pathname);
 
@@ -71,7 +72,6 @@ export const TopBar = () => {
 
   const canRenderNav = !isAuthResolving && !isGuestPublicAuthScreen;
 
-  const pagesToRender = canRenderNav ? navPagesLinks : [];
   const showHamburger = canRenderNav;
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -91,6 +91,13 @@ export const TopBar = () => {
       navigate(`/${label.toLowerCase()}`);
     }
   };
+
+  const pagesToRender = canRenderNav
+    ? [
+        ...navPagesLinks,
+        ...(isAdmin ? [{ label: "Admin", to: "/admin/board" }] : []),
+      ]
+    : [];
 
   return (
     <>

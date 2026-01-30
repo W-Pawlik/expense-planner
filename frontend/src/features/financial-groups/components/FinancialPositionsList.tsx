@@ -15,8 +15,8 @@ import type { FinancialPosition } from "../types/financialPosition.types";
 
 interface FinancialPositionsListProps {
   positions: FinancialPosition[];
-  onAddPosition: () => void;
-  onDeletePosition: (id: string) => void;
+  onAddPosition?: () => void;
+  onDeletePosition?: (id: string) => void;
   onPositionClick?: (position: FinancialPosition) => void;
 }
 
@@ -103,41 +103,45 @@ export const FinancialPositionsList = ({
                     </Typography>
                   </Box>
 
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeletePosition(p.id);
-                    }}
-                  >
-                    <DeleteOutlineIcon fontSize="small" />
-                  </IconButton>
+                  {onDeletePosition && (
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeletePosition(p.id);
+                      }}
+                    >
+                      <DeleteOutlineIcon fontSize="small" />
+                    </IconButton>
+                  )}
                 </Stack>
               </Box>
             );
           })}
 
-          <Box
-            sx={{
-              mt: 1,
-              borderRadius: 1,
-              px: 2,
-              py: 1.5,
-              border: "1px dashed rgba(148,163,184,0.4)",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              cursor: "pointer",
-              "&:hover": {
-                borderColor: "primary.main",
-              },
-            }}
-            onClick={onAddPosition}
-          >
-            <AddIcon fontSize="small" sx={{ mr: 1 }} />
-            <Typography variant="body2">Add New Position</Typography>
-          </Box>
+          {onAddPosition && (
+            <Box
+              sx={{
+                mt: 1,
+                borderRadius: 1,
+                px: 2,
+                py: 1.5,
+                border: "1px dashed rgba(148,163,184,0.4)",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                cursor: "pointer",
+                "&:hover": {
+                  borderColor: "primary.main",
+                },
+              }}
+              onClick={onAddPosition}
+            >
+              <AddIcon fontSize="small" sx={{ mr: 1 }} />
+              <Typography variant="body2">Add New Position</Typography>
+            </Box>
+          )}
         </Stack>
       </CardContent>
     </Card>
