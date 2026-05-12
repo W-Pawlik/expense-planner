@@ -4,12 +4,12 @@ services:
     container_name: mongo
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: adminpassword
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     volumes:
       - mongo_data:/data/db
-    ports:
-      - "27017:27017"
+    networks:
+      - app-network
 
   backend:
     build:
@@ -18,26 +18,38 @@ services:
     container_name: backend
     restart: unless-stopped
     env_file:
-      - ./backend/.env
+      - ./.env
     environment:
-      - MONGO_URI=mongodb://admin:adminpassword@mongo:27017/expense-planner?authSource=admin
+      - MONGO_URI=${MONGO_URI}
+      - PORT=${BACKEND_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
+      - CORS_ORIGINS=${CORS_ORIGINS}
     depends_on:
       - mongo
     ports:
-      - "3000:3000"
+      - "${BACKEND_PORT}:3000"
+    networks:
+      - app-network
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
     container_name: frontend
     restart: unless-stopped
     depends_on:
       - backend
     ports:
       - "5173:80"
-    environment:
-      - VITE_API_URL=http://localhost:3000
+    networks:
+      - app-network
 
 volumes:
   mongo_data:
+
+networks:
+  app-network:
+    driver: bridge

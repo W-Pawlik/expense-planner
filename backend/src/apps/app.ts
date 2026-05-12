@@ -12,8 +12,13 @@ import { env } from '../config/env';
 export const createApp = (): Application => {
   const app = express();
 
+  const allowedOrigins = (env.corsOrigins ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
+
   const corsOptions: cors.CorsOptions = {
-    origin: (env.corsOrigins || '').split(','),
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   };
